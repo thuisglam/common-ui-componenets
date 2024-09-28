@@ -1,0 +1,70 @@
+<header class="bg-light text-dark p-3">
+    <!-- Top Bar for "Become a Pro" and "Sign In" -->
+    <div class="top-bar d-flex justify-content-between align-items-center bg-dark text-white py-1">
+        <!-- Logo on the Left -->
+        <a class="navbar-brand" (click)="clickedItem('home')">
+            <img src="icons/logo.png" alt="ThuisGlam Logo" class="d-inline-block align-top" style="height: 60px;">
+        </a>
+        <div class="d-flex justify-content-end align-items-center">
+            <a (click)="clickedItem('provider')" class="text-white mx-2" translate>nav.becomePro</a>
+            <span class="mx-1">|</span>
+            <a (click)="clickedItem('signIn')" class="text-white mx-2" translate>nav.signIn</a>
+        </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-xl navbar-light bg-light position-relative">
+        <!-- Centered Navigation Links -->
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a (click)="clickedItem('home')" class="nav-link" translate>nav.services</a>
+                </li>
+                <li class="nav-item">
+                    <a (click)="clickedItem('contact-us')" class="nav-link" translate>nav.contact_us</a>
+                </li>
+                <li class="nav-item">
+                    <a (click)="clickedItem('home')" class="nav-link" translate>nav.getApp</a>
+                </li>
+                <li class="nav-item">
+                    <a (click)="clickedItem('home')" class="nav-link" translate>nav.ourStory</a>
+                </li>
+                <li class="nav-item">
+                    <a (click)="clickedItem('home')" class="nav-link" translate>nav.weddings</a>
+                </li>
+                <li class="nav-item">
+                    <a (click)="clickedItem('home')" class="nav-link" translate>nav.shop</a>
+                </li>
+                <li class="nav-item">
+                    <a (click)="clickedItem('home')" class="nav-link" translate>nav.giftCards</a>
+                </li>
+                <li class="nav-item">
+                    <a (click)="clickedItem('home')" class="nav-link" translate>nav.blog</a>
+                </li>
+                <!-- Language Selector -->
+                <li class="nav-item">
+                    <select class="form-select bg-dark text-white" (change)="changeLanguage($event)">
+                        <option value="en" [selected]="translate.currentLang === 'en'">English</option>
+                        <option value="nl" [selected]="translate.currentLang === 'nl'">Nederlands</option>
+                    </select>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Right Section: "Book Now" Button and Menu Icon -->
+        <div class="d-flex justify-content-end align-items-center">
+
+            <!-- Menu Button aligned to the right -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Conditionally show the "Book Now" button only on the home page -->
+            <a *ngIf="isHomePage()" (click)="clickedItem('book')" class="btn btn-primary mx-3"
+                translate>nav.bookNow</a>
+
+        </div>
+    </nav>
+</header>

@@ -1,0 +1,103 @@
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Override default Bootstrap primary button styles */
+.btn-primary {
+    background-color: #333;
+    /* Custom background color */
+    border: none;
+    /* Remove border */
+    padding: 10px 20px;
+    /* Custom padding */
+    font-weight: bold;
+    /* Custom font weight */
+}
+
+.btn-primary:hover {
+    background-color: #ff4081;
+    /* Custom hover color */
+}
+
+
+/* Top Bar Customization */
+.top-bar {
+    font-size: 0.9rem;
+    background-color: #333;
+    padding-left: 15px; /* Ensure the logo has enough padding */
+}
+
+.top-bar a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.top-bar a:hover {
+    text-decoration: underline;
+}
+
+.navbar-brand {
+    margin-right: auto; /* Ensure the logo stays on the left */
+}
+
+/* Navbar Customization */
+.navbar-light .navbar-nav .nav-link {
+    font-weight: 600;
+    margin: 0 15px;
+    color: #333;
+    cursor: pointer;
+}
+
+.navbar-light .navbar-nav .nav-link:hover {
+    color: #ff4081;
+    /* ThuisGlam brand color */
+}
+
+/* Book Now Button */
+.btn-dark {
+    background-color: #333;
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+}
+
+.btn-dark:hover {
+    background-color: #ff4081;
+    /* Brand hover color */
+}
+
+/* Menu Text */
+.menu-text {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Mobile-specific styling */
+@media (max-width: 1200px) {
+    .navbar-nav {
+        text-align: center;
+    }
+
+    .nav-item {
+        margin-bottom: 10px;
+    }
+
+    .menu-text {
+        display: none;
+    }
+
+    .navbar-toggler {
+        font-size: 1.5rem;
+        color: #333;
+    }
+}
+
+.navbar{
+    display: flex;
+}

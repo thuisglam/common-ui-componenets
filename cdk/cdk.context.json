@@ -1,0 +1,10 @@
+{
+  "hosted-zone:account=851725425279:domainName=webcomp.thuisglam.com:region=eu-north-1": {
+    "Id": "/hostedzone/Z0897947134A2YD7XBTDP",
+    "Name": "webcomp.thuisglam.com."
+  },
+  "hosted-zone:account=851725425279:domainName=webcomp.thuisglam.nl:region=eu-north-1": {
+    "Id": "/hostedzone/Z04636972MLIO1YPI9KLC",
+    "Name": "webcomp.thuisglam.nl."
+  }
+}

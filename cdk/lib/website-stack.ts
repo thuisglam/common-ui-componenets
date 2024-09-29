@@ -27,7 +27,7 @@ import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import { Construct } from "constructs";
 import { websiteConfiguration } from "../config/websiteConfiguration";
 
-const path = "../website/dist/provider-portal/browser";
+const path = "../website/dist//common-ui-components/browser";
 
 interface WebSiteStackProps extends cdk.StackProps {
   certificateArnMap: Map<string, string>; // Add the certificateArnMap to props
@@ -38,7 +38,7 @@ export class WebSiteStack extends cdk.Stack {
     super(scope, id, props);
 
     // Create an S3 bucket to host the static website
-    const hostingBucket = new Bucket(this, "provider-portal-website", {
+    const hostingBucket = new Bucket(this, "/common-ui-components-website", {
       autoDeleteObjects: true,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       encryption: BucketEncryption.S3_MANAGED,
@@ -46,15 +46,15 @@ export class WebSiteStack extends cdk.Stack {
     });
 
     // Deploy website assets to the S3 bucket
-    new BucketDeployment(this, "provider-portal-website-deployment", {
+    new BucketDeployment(this, "/common-ui-components-website-deployment", {
       sources: [Source.asset(path)],
       destinationBucket: hostingBucket,
     });
 
     // Create an Origin Access Control (OAC) to securely allow CloudFront to access the S3 bucket
-    const oac = new CfnOriginAccessControl(this, "provider-portal-oac", {
+    const oac = new CfnOriginAccessControl(this, "/common-ui-components-oac", {
       originAccessControlConfig: {
-        name: "provider-portal-oac",
+        name: "/common-ui-components-oac",
         originAccessControlOriginType: "s3",
         signingBehavior: "always",
         signingProtocol: "sigv4",
@@ -65,7 +65,7 @@ export class WebSiteStack extends cdk.Stack {
     const distributionLoggingPrefix = "distribution-access-logs/";
     const distributionLoggingBucket = new Bucket(
       this,
-      "provider-portal-distribution-logging-bucket",
+      "/common-ui-components-distribution-logging-bucket",
       {
         objectOwnership: ObjectOwnership.OBJECT_WRITER,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -86,28 +86,6 @@ export class WebSiteStack extends cdk.Stack {
     const domainConfigs = websiteConfiguration.domains;
 
     domainConfigs.forEach((domainConfig, index) => {
-      // Configure API origin for CloudFront
-      const apiOriginConfig = {
-        customOriginSource: {
-          domainName: `${domainConfig.apiId}.execute-api.${this.region}.amazonaws.com`,
-          originPath: "", // Adjust to your API stage if different
-        },
-        behaviors: [
-          {
-            pathPattern: "/prod/*",
-            allowedMethods: CloudFrontAllowedMethods.ALL,
-            cachePolicy: CachePolicy.CACHING_DISABLED,
-            compress: true,
-            cachedMethods: CloudFrontAllowedCachedMethods.GET_HEAD_OPTIONS,
-            viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-            minTtl: cdk.Duration.seconds(0),
-            maxTtl: cdk.Duration.seconds(86400),
-            defaultTtl: cdk.Duration.seconds(3600),
-            originRequestPolicy:
-              OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER
-          },
-        ],
-      };
 
       // Create CloudFront distributions for each subdomain
       const domainsToHandle = [...domainConfig.subdomains.map(sub => `${sub}.${domainConfig.domainName}`)];
@@ -123,7 +101,7 @@ export class WebSiteStack extends cdk.Stack {
         // Create CloudFront distribution
         const cloudFrontDistribution = new CloudFrontWebDistribution(
           this,
-          `provider-portal-distribution-${index}-${subIndex}`,
+          `/common-ui-components-distribution-${index}-${subIndex}`,
           {
             originConfigs: [
               {
@@ -143,7 +121,6 @@ export class WebSiteStack extends cdk.Stack {
                   },
                 ],
               },
-              apiOriginConfig,
             ],
             viewerCertificate: {
               aliases: [fullDomain],

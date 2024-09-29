@@ -1,0 +1,12 @@
+{
+    "name": "common-ui-componenets",
+    "version": "1.0.0",
+    "description": "common component",
+    "scripts": {
+      "build-cdk": "cd cdk && npm install && npm run build",
+      "build-angular": "cd website && npm install && npm run build:elements",
+      "build": "npm run build-angular && npm run build-cdk",
+      "deploy": "cd cdk && npm install && npm run build  && cdk deploy --all --profile thuis-glamour"
+    }
+  }
+  

@@ -1,5 +1,5 @@
 import { NgIf } from '@angular/common';
-import { Component, EventEmitter, inject, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, inject, Output } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -13,9 +13,10 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   styleUrl: './header.component.scss'
 })
 export class HeaderComponent {
-  @Output() navigate = new EventEmitter();
-  @Output() languageChanged = new EventEmitter();
+  @Output() navigatechanged = new EventEmitter();
+  @Output() languagechanged = new EventEmitter();
   translate = inject(TranslateService);
+  cd = inject(ChangeDetectorRef);
   selectedNav = 'home';
 
   constructor() {
@@ -26,14 +27,17 @@ export class HeaderComponent {
 
   clickedItem(name: string) {
     this.selectedNav = name;
-    this.navigate.emit(name);
+    this.navigatechanged.emit(name);
+    this.cd.detectChanges();
   }
 
   changeLanguage(event: any) {
     const language = event.target.value
     this.translate.setDefaultLang(language);
     this.translate.use(language);
-    this.languageChanged.emit(language);
+    this.languagechanged.emit(language);
+    console.log(language);
+    this.cd.detectChanges();
   }
 
   isHomePage = () => this.selectedNav === 'home';

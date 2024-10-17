@@ -48,7 +48,8 @@ export class WebSiteStack extends cdk.Stack {
         {
           allowedMethods: [cdk.aws_s3.HttpMethods.HEAD, cdk.aws_s3.HttpMethods.GET],
           allowedOrigins: [
-            // Specify the origins you want to allow
+            "https://thuisglam.nl",
+            "https://thuisglam.com",
             "https://pro.thuisglam.nl",
             "https://pro.thuisglam.com",
           ],

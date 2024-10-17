@@ -1,13 +1,12 @@
 import * as cdk from "aws-cdk-lib";
 import {
+  AllowedMethods,
   CachePolicy,
-  CfnDistribution,
-  CfnOriginAccessControl,
-  CloudFrontAllowedCachedMethods,
-  CloudFrontAllowedMethods,
-  CloudFrontWebDistribution,
-  OriginRequestPolicy,
+  Distribution,
   ViewerProtocolPolicy,
+  OriginAccessIdentity,
+  OriginRequestPolicy,
+  ResponseHeadersPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
 import { Effect, PolicyStatement, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import {
@@ -26,6 +25,8 @@ import {
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import { Construct } from "constructs";
 import { websiteConfiguration } from "../config/websiteConfiguration";
+import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
+import { S3Origin } from "aws-cdk-lib/aws-cloudfront-origins";
 
 const path = "../website/dist//common-ui-components/browser";
 
@@ -43,6 +44,22 @@ export class WebSiteStack extends cdk.Stack {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       encryption: BucketEncryption.S3_MANAGED,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      cors: [
+        {
+          allowedMethods: [cdk.aws_s3.HttpMethods.HEAD, cdk.aws_s3.HttpMethods.GET],
+          allowedOrigins: [
+            // Specify the origins you want to allow
+            "https://pro.thuisglam.nl",
+            "https://pro.thuisglam.com",
+          ],
+          allowedHeaders: ["*"],
+          exposedHeaders: [
+            "access-control-allow-credentials",
+            "access-control-allow-methods",
+            "access-control-allow-origin"
+          ],
+        },
+      ],
     });
 
     // Deploy website assets to the S3 bucket
@@ -51,14 +68,9 @@ export class WebSiteStack extends cdk.Stack {
       destinationBucket: hostingBucket,
     });
 
-    // Create an Origin Access Control (OAC) to securely allow CloudFront to access the S3 bucket
-    const oac = new CfnOriginAccessControl(this, "/common-ui-components-oac", {
-      originAccessControlConfig: {
-        name: "/common-ui-components-oac",
-        originAccessControlOriginType: "s3",
-        signingBehavior: "always",
-        signingProtocol: "sigv4",
-      },
+    // Create an Origin Access Identity (OAI) to securely allow CloudFront to access the S3 bucket
+    const oac = new OriginAccessIdentity(this, "CommonUIComponentsOAI", {
+      comment: "OAI for Common UI Components Website",
     });
 
     // Create an S3 bucket for CloudFront access logging
@@ -98,54 +110,31 @@ export class WebSiteStack extends cdk.Stack {
           throw new Error(`Certificate ARN not found for domain: ${fullDomain}`);
         }
 
-        // Create CloudFront distribution
-        const cloudFrontDistribution = new CloudFrontWebDistribution(
+        // Create the certificate object from ARN
+        const certificate = Certificate.fromCertificateArn(
           this,
-          `/common-ui-components-distribution-${index}-${subIndex}`,
-          {
-            originConfigs: [
-              {
-                s3OriginSource: {
-                  s3BucketSource: hostingBucket,
-                },
-                behaviors: [
-                  {
-                    isDefaultBehavior: true,
-                    allowedMethods: CloudFrontAllowedMethods.GET_HEAD,
-                    compress: true,
-                    cachedMethods: CloudFrontAllowedCachedMethods.GET_HEAD,
-                    viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                    minTtl: cdk.Duration.seconds(0),
-                    maxTtl: cdk.Duration.seconds(86400),
-                    defaultTtl: cdk.Duration.seconds(3600),
-                  },
-                ],
-              },
-            ],
-            viewerCertificate: {
-              aliases: [fullDomain],
-              props: {
-                acmCertificateArn: certificateArn, // Use the certificateArn from the map
-                sslSupportMethod: "sni-only",
-                minimumProtocolVersion: "TLSv1.2_2021",
-              },
-            },
-            loggingConfig: {
-              bucket: distributionLoggingBucket,
-              includeCookies: false,
-            },
-            defaultRootObject: "index.html"
-          }
+          `Certificate${index}${subIndex}`,
+          certificateArn
         );
 
-        // Work around for OAC to add property override to the CloudFront distribution
-        const cfnDistribution = cloudFrontDistribution.node
-          .defaultChild as CfnDistribution;
-
-        cfnDistribution.addPropertyOverride(
-          "DistributionConfig.Origins.0.OriginAccessControlId",
-          oac.getAtt("Id")
-        );
+        // Create CloudFront distribution
+        const cloudFrontDistribution = new Distribution(this, `/common-ui-components-distribution-${index}-${subIndex}`, {
+          defaultBehavior: {
+            origin: new S3Origin(hostingBucket, {
+              originAccessIdentity: oac, // Set the OAI for S3 access
+            }),
+            viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+            allowedMethods: AllowedMethods.ALLOW_ALL,
+            compress: true,
+            cachePolicy: CachePolicy.CACHING_OPTIMIZED,
+            originRequestPolicy: OriginRequestPolicy.CORS_S3_ORIGIN,
+            responseHeadersPolicy: ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS
+          },
+          domainNames: [fullDomain],
+          certificate: certificate, // Use the certificate object
+          defaultRootObject: "index.html",
+          logBucket: distributionLoggingBucket
+        });
 
         // Create CloudFront target for Route 53
         const cdfTarget = new CloudFrontTarget(cloudFrontDistribution);

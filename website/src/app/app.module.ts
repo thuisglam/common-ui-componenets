@@ -1,4 +1,4 @@
-import { ApplicationRef, DoBootstrap, Injector, NgModule } from '@angular/core';
+import { ApplicationRef, CSP_NONCE, DoBootstrap, Injector, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './header/header.component';
 import { BrowserModule } from '@angular/platform-browser';
@@ -28,11 +28,14 @@ export function HttpLoaderFactory(http: HttpClient) {
         deps: [HttpClient]
       }
     }),
-  ]
+  ],
+  providers: [
+    { provide: CSP_NONCE, useValue: 'rAnd0m' }
+  ],
 })
 export class AppModule implements DoBootstrap {
 
-  constructor(private injector: Injector) {}
+  constructor(private injector: Injector) { }
 
   ngDoBootstrap(appRef: ApplicationRef) {
     const headerComponent = createCustomElement(HeaderComponent, {
@@ -46,4 +49,4 @@ export class AppModule implements DoBootstrap {
     // appRef.bootstrap(HeaderComponent);
   }
 
- }
+}
